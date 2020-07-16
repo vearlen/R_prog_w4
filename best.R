@@ -1,7 +1,7 @@
 best <- function(state,dis = "heart attack"){
-  
+  library(tidyverse)
   #read outcome data
-  outcome <- read.csv("outcome-of-care-measures.csv")
+  outcome <- read.csv("rprog_data_ProgAssignment3-data/outcome-of-care-measures.csv")
   outcome[,11] <- suppressWarnings(as.numeric(outcome[,11]))
   outcome[,23] <- suppressWarnings(as.numeric(outcome[,23]))
   outcome[,17] <- suppressWarnings(as.numeric(outcome[,17]))
