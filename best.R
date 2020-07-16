@@ -1,20 +1,20 @@
-best <- function(state,dis = "heart attack"){
-  
+best <- function(state,outcome = "heart attack"){
+  library(tidyverse)
   #read outcome data
-  outcome <- read.csv("outcome-of-care-measures.csv")
-  outcome[,11] <- suppressWarnings(as.numeric(outcome[,11]))
-  outcome[,23] <- suppressWarnings(as.numeric(outcome[,23]))
-  outcome[,17] <- suppressWarnings(as.numeric(outcome[,17]))
+  input <- read.csv("rprog_data_ProgAssignment3-data/outcome-of-care-measures.csv")
+  input[,11] <- suppressWarnings(as.numeric(input[,11]))
+  input[,23] <- suppressWarnings(as.numeric(input[,23]))
+  input[,17] <- suppressWarnings(as.numeric(input[,17]))
   
   #create variable with state names
-  st_names <- unique(outcome$State)
+  st_names <- unique(input$State)
     
   if(state %in% st_names){
     
   if(dis == "heart attack")
   {
   #return hospital name in selected state with heart attack
-  best_name <- outcome %>%
+  best_name <- input %>%
     select(c(2,7,11))%>%
     filter(State == {{state}}) %>%
     arrange(Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack,
@@ -25,7 +25,7 @@ best <- function(state,dis = "heart attack"){
   }
   else if ( dis == "pneumonia"){
   #return hospital name in selected state with heart attack
-  best_name <- outcome %>%
+  best_name <- input %>%
     select(c(2,7,23))%>%
     filter(State == {{state}}) %>%
     arrange(Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia,
@@ -36,7 +36,7 @@ best <- function(state,dis = "heart attack"){
   }
   else if ( dis == "heart failure"){
     #return hospital name in selected state with heart attack
-    best_name <- outcome %>%
+    best_name <- input %>%
       select(c(2,7,17))%>%
       filter(State == {{state}}) %>%
       arrange(Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure,
