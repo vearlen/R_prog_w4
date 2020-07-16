@@ -3,138 +3,72 @@ rankall <- function(outcome = "heart attack", num = "best"){
   #read outcome data
   input <- read.csv("rprog_data_ProgAssignment3-data/outcome-of-care-measures.csv")
   
-  if(outcome == "heart attack"){
-    
-    #convert character to numbers for heart attack
-    input[,11] <- suppressWarnings(as.numeric(input[,11]))
-    
-    #save and rank all hospital within each state
-    all_names <- input %>%
-      select(c(2,7,11))%>%
-      na.omit() %>%
-      select(Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack,) %>%
-      group_by(State) %>%
-      arrange(Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack,Hospital.Name,.by_group = TRUE) %>%
-      mutate(rank = row_number(), hospital = Hospital.Name, state=State)
-    
-    
-    #save selected states
-    if(num == "best"){
+
+#check input outcome and save column names accordingly OR stop
+  if(outcome == "heart attack") {a <- "Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack" 
+  x <- 11}
+  else if (outcome == "heart failure"){a <- "Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
+  x <- 17}
+  else if (outcome == "pneumonia"){a <- "Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"
+  x <- 23}
+else {stop ("invalid outcome")}
+  
+#convert character to numbers selected column
+  input[,x] <- suppressWarnings(as.numeric(input[,x])) 
+  
+#save and rank all hospital within each state
+  all_names <- input %>%
+    select(c(2,7,x))%>%
+    na.omit() %>%
+    group_by(State) %>%
+    arrange(a,Hospital.Name,.by_group = TRUE) %>%
+    mutate(rank = row_number(), hospital = Hospital.Name, state=State)
+  
+#create list of states with max hospital number   
+  max_rank_state <- all_names %>%
+    group_by(State)%>%
+    mutate(state=State)%>%
+    summarise(maxno = max(rank)) 
+  
+#process num variable input when value is "best"
+  if(num == "best"){
     selected <- all_names %>%
       group_by(state)%>%
       filter(rank == 1) %>%
       select(hospital, state)
-      #print table
-      selected
-    }
-    else if (num == "worst"){
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == max(rank)) %>%
-        select(hospital, state)
-      #print table
-      selected
-    }
-    
-    else{
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == {{num}}) %>%
-        select(hospital,state)
-      #print table
-      selected
-    }
+    #print table
+    selected
   }
   
-  else if(outcome == "pneumonia"){
-    
-    #convert character to numbers for pneumonia
-    input[,23] <- suppressWarnings(as.numeric(input[,23]))
-    
-    #save and rank all hospital within each state
-    all_names <- input %>%
-      select(c(2,7,23))%>%
-      na.omit() %>%
-      select(Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia) %>%
-      group_by(State) %>%
-      arrange(Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia,Hospital.Name,.by_group = TRUE) %>%
-      mutate(rank = row_number(), hospital = Hospital.Name, state=State)
-    
-    
-    #save selected states
-    if(num == "best"){
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == 1) %>%
-        select(hospital, state)
-      #print table
-      selected
-    }
-    else if (num == "worst"){
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == max(rank)) %>%
-        select(hospital, state)
-      #print table
-      selected
-    }
-    
-    else{
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == {{num}}) %>%
-        select(hospital,state)
-      #print table
-      selected
-    }
+  #process num variable input when  value is "worst"    
+  else if (num == "worst"){
+    selected <- all_names %>%
+      group_by(state)%>%
+      filter(rank == max(rank)) %>%
+      select(hospital, state)
+    #print table
+    selected
   }
   
-  else if(outcome == "heart failure"){
-    
-    #convert character to numbers for heart failure
-    input[,17] <- suppressWarnings(as.numeric(input[,17]))
-    
-    #save and rank all hospital within each state
-    all_names <- input %>%
-      select(c(2,7,17))%>%
-      na.omit() %>%
-      select(Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure) %>%
-      group_by(State) %>%
-      arrange(Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure,Hospital.Name,.by_group = TRUE) %>%
-      mutate(rank = row_number(), hospital = Hospital.Name, state=State)
-    
-    
-    #check what is input in num variable
-    #and proceed accordingly
-    
-    if(num == "best"){
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == 1) %>%
-        select(hospital, state)
-      #print table
-      selected
-    }
-    else if (num == "worst"){
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == max(rank)) %>%
-        select(hospital, state)
-      #print table
-      selected
-    }
-    
-    else{
-      selected <- all_names %>%
-        group_by(state)%>%
-        filter(rank == {{num}}) %>%
-        select(hospital,state)
-      #print table
-      selected
-    }
-  }
-  
+  #process num input variable when numeric value     
   else{
-    paste("Error in best(",state,",",outcome,") : invalid outcome")
+    selected <- all_names %>%
+      group_by(state)%>%
+      filter(rank == {{num}}) %>%
+      select(hospital,state)
+    
+#create data frame with cases per state less then input num when numeric
+    na_hosp <- max_rank_state %>% 
+      mutate( cutoff = (num > max_rank_state$maxno)) %>%
+      filter (cutoff == TRUE) %>%
+      rename(state = State) %>%
+      mutate (hospital = NA)%>%
+      select(hospital, state)   
+    
+#bind NA states and valid cases and print
+    result <- rbind(selected, na_hosp) %>%
+      arrange (state)
+    
+    result
   }
 }
