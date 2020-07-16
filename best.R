@@ -1,5 +1,4 @@
 best <- function(state,outcome = "heart attack"){
-  library(tidyverse)
   #read outcome data
   input <- read.csv("rprog_data_ProgAssignment3-data/outcome-of-care-measures.csv")
   input[,11] <- suppressWarnings(as.numeric(input[,11]))
@@ -11,9 +10,10 @@ best <- function(state,outcome = "heart attack"){
     
   if(state %in% st_names){
     
-  if(dis == "heart attack")
+  if(outcome == "heart attack")
   {
   #return hospital name in selected state with heart attack
+
   best_name <- input %>%
     select(c(2,7,11))%>%
     filter(State == {{state}}) %>%
@@ -23,8 +23,9 @@ best <- function(state,outcome = "heart attack"){
     slice_head() 
   best_name[[1]]
   }
-  else if ( dis == "pneumonia"){
+  else if ( outcome == "pneumonia"){
   #return hospital name in selected state with heart attack
+
   best_name <- input %>%
     select(c(2,7,23))%>%
     filter(State == {{state}}) %>%
@@ -34,8 +35,9 @@ best <- function(state,outcome = "heart attack"){
     slice_head() 
   best_name[[1]]
   }
-  else if ( dis == "heart failure"){
+  else if ( outcome == "heart failure"){
     #return hospital name in selected state with heart attack
+
     best_name <- input %>%
       select(c(2,7,17))%>%
       filter(State == {{state}}) %>%
@@ -46,9 +48,9 @@ best <- function(state,outcome = "heart attack"){
     best_name[[1]]
   }
   else{
-    paste("Error in best(",state,",",dis,") : invalid outcome")}
+    paste("Error in best(",state,",",outcome,") : invalid outcome")}
   }
   else{
-    paste("Error in best(",state,",",dis,") : invalid state")
+    paste("Error in best(",state,",",outcome,") : invalid state")
   }
 }
