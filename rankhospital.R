@@ -9,25 +9,26 @@ rankhospital <- function(state,outcome = "heart attack",num = "best"){
   
   if(state %in% st_names){ #check if state is correctly entered
 
-    if(outcome == "heart attack") {a <- "Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack" 
+    if(outcome == "heart attack") {a <- "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack" 
     x <- 11}
-    else if (outcome == "heart failure"){a <- "Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
+    else if (outcome == "heart failure"){a <- "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
     x <- 17}
     else if (outcome == "pneumonia"){a <- "Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"
     x <- 23}
     else {stop ("invalid outcome")}
-  
+  }
+    else{stop ("invalid state")}
     
     #convert character to numbers selected column
     input[,x] <- suppressWarnings(as.numeric(input[,x])) 
-    
-      
+    #rename target column for arrange ()   
+    input <- rename(input, dmr = a )
       #save data frame with names in selected state with heart attack
       all_names <- input %>%
         select(c(2,7,x))%>%
         filter(State == {{state}}) %>%
         na.omit %>%
-        arrange(a,Hospital.Name)%>%
+        arrange(dmr,Hospital.Name)%>% #arrange not working properly
         select(Hospital.Name)
         
       #check number of rows
@@ -50,7 +51,3 @@ rankhospital <- function(state,outcome = "heart attack",num = "best"){
           NA
         }
   }
-
-  else{stop ("invalid state")}
-    
-}

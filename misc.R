@@ -21,6 +21,15 @@ outcome %>%
   geom_histogram(aes(outcome[,11]),binwidth = .5)
 
 # rankhospital ------------------------------------------------------------
+a <- "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
+input[,17] <- suppressWarnings(as.numeric(input[,17]))
+all_names <- input %>%
+  select(c(2,7,17))%>%
+  filter(State == "TX") %>%
+  na.omit %>%
+  group_by (State) %>%
+  arrange(a,Hospital.Name, .by_group = TRUE)
+  select(Hospital.Name,a)
 
 
 best_name <- outcome %>%
@@ -58,14 +67,19 @@ case_when(
 num <- 20
 
 input <- read.csv("rprog_data_ProgAssignment3-data/outcome-of-care-measures.csv")
-input[,11] <- suppressWarnings(as.numeric(input[,11]))
+a <- c("Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack")
+
+input <- rename(input, dmr = a )
+x <- 11
+input[,x] <- suppressWarnings(as.numeric(input[,x]))
+b <- c(a, "Hospital.Name","State")
+a
 
 all_names <- input %>%
-  select(c(2,7,11))%>%
+  select(c(2,7,x))%>%
   na.omit() %>%
-  select(Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack,) %>%
   group_by(State) %>%
-  arrange(Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack,Hospital.Name,State,.by_group = TRUE) %>%
+  arrange(dmr, Hospital.Name, .by_group = TRUE) %>%
   mutate(rank = row_number(), hospital = Hospital.Name, state=State)
 
 max_rank_state <- all_names %>%

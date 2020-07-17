@@ -5,9 +5,9 @@ rankall <- function(outcome = "heart attack", num = "best"){
   
 
 #check input outcome and save column names accordingly OR stop
-  if(outcome == "heart attack") {a <- "Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack" 
+  if(outcome == "heart attack") {a <- "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack" 
   x <- 11}
-  else if (outcome == "heart failure"){a <- "Hospital.Name, State,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
+  else if (outcome == "heart failure"){a <- "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
   x <- 17}
   else if (outcome == "pneumonia"){a <- "Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"
   x <- 23}
@@ -15,13 +15,14 @@ else {stop ("invalid outcome")}
   
 #convert character to numbers selected column
   input[,x] <- suppressWarnings(as.numeric(input[,x])) 
-  
+#rename target column for arrange ()
+  input <- rename(input, dmr = a )
 #save and rank all hospital within each state
   all_names <- input %>%
-    select(c(2,7,x))%>%
+    select(all_of(c(2,7,x)))%>%
     na.omit() %>%
     group_by(State) %>%
-    arrange(a,Hospital.Name,.by_group = TRUE) %>%
+    arrange(dmr,Hospital.Name,.by_group = TRUE) %>%
     mutate(rank = row_number(), hospital = Hospital.Name, state=State)
   
 #create list of states with max hospital number   
